@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>Pitch herUX x UrkuSC - NASA Space Apps</title>
+    <style>
+        /* =========================================
+           VARIABLES Y RESET (Estilo herUX)
+           ========================================= */
+        :root {
+            --magenta: #8C1D6B;
+            --magenta-hover: #a6237f;
+            --dark-bg: #0a0a0c;
+            --dark-card: rgba(20, 20, 25, 0.7);
+            --light-bg: #f8f9fa;
+            --light-card: #ffffff;
+            --text-dark-theme: #f0f0f0;
+            --text-light-theme: #2d2d2d;
+            --border-radius: 18px;
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: var(--dark-bg);
+            color: var(--text-dark-theme);
+            transition: background-color var(--transition), color var(--transition);
+        }
+
+        /* =========================================
+           NAVEGACIÓN Y UI SUPERIOR
+           ========================================= */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--magenta);
+            transition: width 0.4s ease;
+        }
+
+        #top-bar {
+            position: fixed;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+        }
+
+        .ui-badge {
+            background: rgba(140, 29, 107, 0.15);
+            color: var(--magenta);
+            border: 1px solid rgba(140, 29, 107, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        /* =========================================
+           CONTENEDOR DE DIAPOSITIVAS
+           ========================================= */
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.98);
+            transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* =========================================
+           FONDOS CINEMATOGRÁFICOS
+           ========================================= */
+        .bg-dawn {
+            background: radial-gradient(circle at 50% 100%, #1a1a2e 0%, #0a0a0c 100%);
+        }
+        
+        .bg-frost {
+            background: linear-gradient(180deg, #050505 0%, #151b24 100%);
+        }
+
+        .bg-hook-image {
+            background:
+                linear-gradient(rgba(5, 5, 8, 0.62), rgba(5, 5, 8, 0.72)),
+                url("img/Captura de pantalla 2026-11-10 195628 (1).png") center / cover no-repeat;
+        }
+
+        .bg-light {
+            background: var(--light-bg);
+        }
+
+        /* =========================================
+           COMPONENTES Y TARJETAS
+           ========================================= */
+        .title-huge {
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .cover-title {
+            font-size: clamp(3.5rem, 8vw, 6.5rem);
+            line-height: 1.05;
+            letter-spacing: -0.055em;
+            margin-bottom: 0;
+        }
+
+        .cover-title-name {
+            display: block;
+            background: linear-gradient(110deg, #fff 20%, #f3c7e5 65%, #d86bb8 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 8px 24px rgba(140, 29, 107, 0.22));
+        }
+
+        .cover-title-subtitle {
+            display: block;
+            margin-top: 18px;
+            font-size: clamp(1.35rem, 3vw, 2.2rem);
+            font-weight: 400;
+            line-height: 1.3;
+            letter-spacing: -0.025em;
+            color: rgba(240, 240, 240, 0.86);
+        }
+
+        .text-highlight {
+            color: var(--magenta);
+        }
+
+        .subtitle {
+            font-size: 1.8rem;
+            font-weight: 300;
+            opacity: 0.8;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .btn-primary {
+            background: var(--magenta);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 40px;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 10px 20px rgba(140, 29, 107, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--magenta-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Tarjetas */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .light-theme .card {
+            background: var(--light-card);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            color: var(--text-light-theme);
+        }
+
+        .metric {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ff3b30;
+            margin-bottom: 10px;
+        }
+
+        /* Mockup UI */
+        .ui-mockup {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .ui-sidebar {
+            background: #f4f5f7;
+            width: 300px;
+            padding: 30px;
+            border-right: 1px solid #e1e4e8;
+        }
+
+        .ui-main {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .alert-box {
+            background: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid #ff3b30;
+            padding: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="bg-dawn" id="body">
+
+    <!-- UI SUPERIOR -->
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="top-bar">
+        <div class="ui-badge" id="slide-counter">Bienvenida</div>
+        <div class="ui-badge" style="opacity: 0.6; font-weight: 400;">F: Fullscreen | Flechas: Navegar</div>
+    </div>
+
+    <!-- DIAPOSITIVAS -->
+    <div id="presentation-container">
+
+        <!-- SLIDE 0: Bienvenida -->
+        <div class="slide active dark-theme">
+            <div class="ui-badge" style="margin-bottom: 30px; background: rgba(255,255,255,0.1); color: white; border: none;">NASA Space Apps Challenge 2026</div>
+            <h1 class="title-huge cover-title"><span class="cover-title-name">Field Shift</span><span class="cover-title-subtitle">Adaptando granjas con datos de la NASA</span></h1>
+            <button class="btn-primary" onclick="nextSlide()">Iniciar Pitch</button>
+        </div>
+
+        <!-- SLIDE 1: El Gancho (Dolor) -->
+        <div class="slide dark-theme bg-frost bg-hook-image">
+            <h1 class="title-huge" style="font-size: 5rem;">"Cuando la papa falla,<br><span class="text-highlight">todo tiembla.</span>"</h1>
+            <p class="subtitle" style="margin-top: 40px; line-height: 1.6; max-width: 900px;">
+                Conocemos el dolor, el miedo y la incertidumbre de levantarse a las 04:00 AM para ver la cosecha y el esfuerzo de toda una familia destruidos por una helada de madrugada en Chimborazo.
+            </p>
+        </div>
+
+        <!-- SLIDE 2: El Usuario Real -->
+        <div class="slide dark-theme bg-dawn">
+            <h2 class="title-huge" style="font-size: 3.5rem; text-align: left; width: 100%; max-width: 1200px;">Nuestras familias, <span style="font-weight:300;">no un segmento.</span></h2>
+            
+            <div class="card-grid">
+                <div class="card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--magenta);">04:30 AM</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.5;">La jornada inicia antes del amanecer, ordeñando, alimentando animales y revisando la escarcha bajo un frío implacable.</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--magenta);">3,600+ m s.n.m</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.5;">Agricultura de ladera y secano. El clima decide: dependencia total de la lluvia. La siembra es su única cuenta de ahorros.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: La Doble Amenaza -->
+        <div class="slide dark-theme bg-frost">
+            <h2 class="title-huge" style="font-size: 3.5rem;">La Doble Amenaza</h2>
+            
+            <div class="card-grid" style="max-width: 1000px;">
+                <div class="card" style="border-top: 4px solid #ff3b30;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 20px;">Corto Plazo</h3>
+                    <div class="metric">Heladas Repentinas</div>
+                    <p style="font-size: 1.1rem;">La pérdida total de la inversión en una sola noche fría.</p>
+                </div>
+                <div class="card" style="border-top: 4px solid #ff9500;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 20px;">Largo Plazo</h3>
+                    <div class="metric">NDVI &lt; 0.25</div>
+                    <p style="font-size: 1.1rem;">Suelo desnudo y degradado por el monocultivo. Tierra expuesta a la erosión.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: La Solución (Transición a Claro) -->
+        <div class="slide light-theme bg-light">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h2 class="title-huge" style="color: var(--text-light-theme); font-size: 3.5rem;">La tecnología como escudo</h2>
+                <p class="subtitle" style="color: #666; margin: 0 auto;">Una herramienta de apoyo a la decisión en el bolsillo del agricultor.</p>
+            </div>
+
+            <div class="ui-mockup">
+                <div class="ui-sidebar">
+                    <div style="font-weight: 700; font-size: 1.2rem; margin-bottom: 30px; color: var(--magenta);">AgroFrost | herUX</div>
+                    <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-weight: 600;">📍 Parcela: San Luis</div>
+                    <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #666;">🔄 Simular Rotación</div>
+                </div>
+                <div class="ui-main">
+                    <div class="alert-box">
+                        <div style="color: #ff3b30; font-weight: 800; font-size: 1.5rem; margin-bottom: 5px;">75% Probabilidad de Helada</div>
+                        <div style="color: #4a4a4a;">Esta madrugada. Tiempo estimado para acción preventiva: 4 horas.</div>
+                    </div>
+                    <div style="display: flex; gap: 20px;">
+                        <div style="flex: 1; background: #f8f9fa; border-radius: 12px; padding: 20px; border: 1px solid #eee;">
+                            <strong style="color: var(--text-light-theme);">Datos satelitales procesados:</strong>
+                            <ul style="margin-top: 10px; color: #666; padding-left: 20px; line-height: 1.6;">
+                                <li>NASA POWER (Clima)</li>
+                                <li>Landsat (Vigor vegetal)</li>
+                                <li>SRTM (Elevación)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT DE INTERACCIÓN -->
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const body = document.getElementById('body');
+        const topBar = document.getElementById('top-bar');
+        const progressBar = document.getElementById('progress-bar');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        let currentIndex = 0;
+        const totalSlides = slides.length;
+
+        function updateSlides() {
+            // Actualizar clases de los slides
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentIndex) {
+                    slide.classList.add('active');
+                    
+                    // Transición de color de fondo del body
+                    if (slide.classList.contains('light-theme')) {
+                        body.style.backgroundColor = 'var(--light-bg)';
+                        body.style.color = 'var(--text-light-theme)';
+                    } else {
+                        // Respetar variaciones de oscuro
+                        if (slide.classList.contains('bg-frost')) {
+                            body.style.background = 'linear-gradient(180deg, #050505 0%, #151b24 100%)';
+                        } else {
+                            body.style.background = 'radial-gradient(circle at 50% 100%, #1a1a2e 0%, #0a0a0c 100%)';
+                        }
+                        body.style.color = 'var(--text-dark-theme)';
+                    }
+                }
+            });
+
+            // Lógica de la barra superior (Ocultar en portada)
+            if (currentIndex === 0) {
+                topBar.style.opacity = '0';
+                progressBar.style.width = '0%';
+            } else {
+                topBar.style.opacity = '1';
+                // Calculamos progreso ignorando la slide 0
+                const progress = ((currentIndex) / (totalSlides - 1)) * 100;
+                progressBar.style.width = `${progress}%`;
+                slideCounter.textContent = `Slide ${currentIndex} de ${totalSlides - 1}`;
+                
+                // Adaptar el color de la UI superior si estamos en tema claro
+                if (slides[currentIndex].classList.contains('light-theme')) {
+                    slideCounter.style.background = 'rgba(140, 29, 107, 0.1)';
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (currentIndex < totalSlides - 1) {
+                currentIndex++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlides();
+            }
+        }
+
+        // Eventos de teclado
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key.toLowerCase() === 'f') {
+                // Pantalla completa
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Error fullscreen: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
